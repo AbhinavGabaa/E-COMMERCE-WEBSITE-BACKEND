@@ -2,18 +2,19 @@ package com.abhinav.E_CommerceProject.Controller;
 
 import com.abhinav.E_CommerceProject.DTO.request.AddCartReq;
 import com.abhinav.E_CommerceProject.DTO.request.AddProductreq;
+import com.abhinav.E_CommerceProject.DTO.request.BuyReq;
 import com.abhinav.E_CommerceProject.DTO.request.RegisterUserReq;
 import com.abhinav.E_CommerceProject.DTO.response.AddCartResponse;
+import com.abhinav.E_CommerceProject.DTO.response.BuyResponse;
 import com.abhinav.E_CommerceProject.DTO.response.RegisterUserResponse;
 import com.abhinav.E_CommerceProject.Enum.ResponseStatus;
-import com.abhinav.E_CommerceProject.Model.Product;
-import com.abhinav.E_CommerceProject.Model.User;
-import com.abhinav.E_CommerceProject.Model.Cart;
+import com.abhinav.E_CommerceProject.Model.*;
 import com.abhinav.E_CommerceProject.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,16 +60,16 @@ public class UserController {
 //            throw new RuntimeException(e);
 //        }
 //    }
-    public ResponseEntity<Cart> addcart(@RequestBody Cart cart) {
-        try {
-            Cart Cart1 = userService.addTocart(cart);
-            return new ResponseEntity<>(Cart1, HttpStatus.CREATED);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return new ResponseEntity<>(cart, HttpStatus.INTERNAL_SERVER_ERROR);
-
-    }
+//    public ResponseEntity<Cart> addcart(@RequestBody Cart cart) {
+//        try {
+//            Cart Cart1 = userService.addTocart(cart);
+//            return new ResponseEntity<>(Cart1, HttpStatus.CREATED);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return new ResponseEntity<>(cart, HttpStatus.INTERNAL_SERVER_ERROR);
+//
+//    }
 
     @GetMapping("/api/products")
     public List<Product> getAllProducts() {
@@ -104,6 +105,16 @@ public class UserController {
     @GetMapping("/api/cart")
     public List<Cart> getAllCart() {
         return userService.getAllcart();
+    }
+    @PostMapping("/api/cart/buy")
+    public BuyResponse buyProduct(@AuthenticationPrincipal Userprincipal userprincipal, @RequestBody BuyReq buyReq){
+        return userService.buyProduct(buyReq,userprincipal.getUser());
+
+    }
+
+    @GetMapping("/api/orders")
+    public List<Order> getOrders( @RequestParam int userid){
+        return userService.getOrders(userid);
     }
 
 

@@ -2,13 +2,17 @@ package com.abhinav.E_CommerceProject.Service;
 
 import com.abhinav.E_CommerceProject.DTO.request.AddCartReq;
 import com.abhinav.E_CommerceProject.DTO.request.AddProductreq;
+import com.abhinav.E_CommerceProject.DTO.request.BuyReq;
 import com.abhinav.E_CommerceProject.DTO.request.RegisterUserReq;
 import com.abhinav.E_CommerceProject.DTO.response.AddCartResponse;
+import com.abhinav.E_CommerceProject.DTO.response.BuyResponse;
 import com.abhinav.E_CommerceProject.Enum.ResponseStatus;
+import com.abhinav.E_CommerceProject.Model.Order;
 import com.abhinav.E_CommerceProject.Model.Product;
 import com.abhinav.E_CommerceProject.Model.User;
 import com.abhinav.E_CommerceProject.Model.Cart;
 import com.abhinav.E_CommerceProject.Repository.CartRepo;
+import com.abhinav.E_CommerceProject.Repository.OrderRepo;
 import com.abhinav.E_CommerceProject.Repository.ProductRepo;
 import com.abhinav.E_CommerceProject.Repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +23,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -31,6 +35,8 @@ public class UserService {
 
     @Autowired
     private CartRepo cartRepo;
+    @Autowired
+    private OrderRepo orderRepo;
 
     @Autowired
     private JWTService jwtService;
@@ -136,5 +142,19 @@ public class UserService {
 
     public List<Cart> getAllcart() {
         return cartRepo.findAll();
+    }
+    public BuyResponse buyProduct(BuyReq req, User user){
+        Optional<Cart> cart= cartRepo.findById(req.getCartid());
+        Order order = new Order();
+        order.setCartProductlist((List<Cart>) cart.get());
+        order.setUser(user);
+        orderRepo.save(order);
+        BuyResponse response = new BuyResponse();
+        response.setMessage("Success");
+        return response;
+    }
+
+    public List<Order> getOrders(int userid) {
+        return orderRepo.findByUserId(userid);
     }
 }

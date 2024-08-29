@@ -33,7 +33,7 @@ public class SpringConfig {
         return http
                 .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("api/register", "api/login","/api/products","/error").permitAll()
+                        .requestMatchers("api/register", "api/login","/api/products").permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
                 // .formLogin(Customizer.withDefaults())

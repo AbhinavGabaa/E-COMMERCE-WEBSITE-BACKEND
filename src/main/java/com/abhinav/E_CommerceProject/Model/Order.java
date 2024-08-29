@@ -13,7 +13,7 @@ public class Order {
     private int id;
 
     @OneToMany
-    private List<CartProduct> cartProductlist;
+    private List<Cart> cartProductlist;
 
     @ManyToOne
     private User user;
