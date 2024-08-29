@@ -12,11 +12,13 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @OneToMany
-    private List<Cart> cartProductlist;
+    @OneToOne
+    private Cart cart;
 
     @ManyToOne
     private User user;
+
+    private int amount;
 
 
 }

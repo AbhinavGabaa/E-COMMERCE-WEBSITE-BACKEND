@@ -107,14 +107,21 @@ public class UserController {
         return userService.getAllcart();
     }
     @PostMapping("/api/cart/buy")
-    public BuyResponse buyProduct(@AuthenticationPrincipal Userprincipal userprincipal, @RequestBody BuyReq buyReq){
-        return userService.buyProduct(buyReq,userprincipal.getUser());
+    public BuyResponse buyProduct(Authentication authentication, @RequestBody BuyReq buyReq){
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        return userService.buyProduct(userDetails.getUsername(),buyReq);
 
     }
 
     @GetMapping("/api/orders")
-    public List<Order> getOrders( @RequestParam int userid){
+    public List<Order> getOrders(Authentication authentication, int userid){
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         return userService.getOrders(userid);
+    }
+    @PostMapping("/api/category/add")
+    public Category addCategory(@RequestBody Category category){
+        return userService.addCategory(category);
+
     }
 
 

@@ -7,14 +7,8 @@ import com.abhinav.E_CommerceProject.DTO.request.RegisterUserReq;
 import com.abhinav.E_CommerceProject.DTO.response.AddCartResponse;
 import com.abhinav.E_CommerceProject.DTO.response.BuyResponse;
 import com.abhinav.E_CommerceProject.Enum.ResponseStatus;
-import com.abhinav.E_CommerceProject.Model.Order;
-import com.abhinav.E_CommerceProject.Model.Product;
-import com.abhinav.E_CommerceProject.Model.User;
-import com.abhinav.E_CommerceProject.Model.Cart;
-import com.abhinav.E_CommerceProject.Repository.CartRepo;
-import com.abhinav.E_CommerceProject.Repository.OrderRepo;
-import com.abhinav.E_CommerceProject.Repository.ProductRepo;
-import com.abhinav.E_CommerceProject.Repository.UserRepo;
+import com.abhinav.E_CommerceProject.Model.*;
+import com.abhinav.E_CommerceProject.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,6 +32,8 @@ public class UserService {
     @Autowired
     private OrderRepo orderRepo;
 
+    @Autowired
+    private CategoryRepo categoryRepo;
     @Autowired
     private JWTService jwtService;
 
@@ -77,13 +73,34 @@ public class UserService {
         return cartRepo.save(cart);
     }
 
-    public Product addAProduct(AddProductreq addProductreq) {
-        Product product1 = new Product();
-        product1.setName(addProductreq.getName());
-        product1.setPrice(addProductreq.getPrice());
-        product1.setStock(addProductreq.getStock());
-        System.out.println(product1.getName());
-        return productRepo.save(product1);
+//    public Product addAProduct(AddProductreq addProductreq) {
+//        Product product1 = new Product();
+//        product1.setName(addProductreq.getName());
+//        product1.setPrice(addProductreq.getPrice());
+//        product1.setStock(addProductreq.getStock());
+//        System.out.println(product1.getName());
+//        return productRepo.save(product1);
+//    }
+public Product addAProduct(AddProductreq addProductreq) {
+    Category category = categoryRepo.findById(addProductreq.getCategoryId())
+            .orElseThrow(() -> new RuntimeException("Category not found"));
+
+    Product product = new Product();
+    product.setName(addProductreq.getName());
+    product.setPrice(addProductreq.getPrice());
+    product.setStock(addProductreq.getStock());
+    product.setCategory(category);
+
+    return productRepo.save(product);
+}
+    public Category addCategory(Category category) {
+        return categoryRepo.save(category);
+    }
+    public List<Product> getProductsByCategory(int categoryId) {
+        Category category = categoryRepo.findById(categoryId)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        return category.getProducts();
     }
 
     public List<Product> getAllProducts() {
@@ -115,12 +132,23 @@ public class UserService {
             product.setStock(product.getStock() - 1);
             productRepo.save(product);
 
+            Optional<Cart> cart = cartRepo.findById(req.getCartId());
+            Cart cartHistory;
+
+            if(cart.isPresent()){
+                cartHistory = cart.get();
+            }
+            else {
+                cartHistory = new Cart();
+            }
             // Create a new Cart object
-            Cart cartHistory = new Cart();
             cartHistory.setUser(user);
 
             // Create a List and add the Product to it
-            List<Product> products = new ArrayList<>();
+            List<Product> products = cartHistory.getProducts();
+            if(products == null){
+                products = new ArrayList<>();
+            }
             products.add(product);
 
             // Set the products list in the Cart
@@ -143,13 +171,24 @@ public class UserService {
     public List<Cart> getAllcart() {
         return cartRepo.findAll();
     }
-    public BuyResponse buyProduct(BuyReq req, User user){
-        Optional<Cart> cart= cartRepo.findById(req.getCartid());
+    public BuyResponse buyProduct( String username,BuyReq req){
+        Optional<Cart> cart= cartRepo.findById(req.getCartId());
         Order order = new Order();
-        order.setCartProductlist((List<Cart>) cart.get());
+        order.setCart(cart.get());
+        int amountTotal = 0;
+        for(Product product : cart.get().getProducts())
+        {
+            amountTotal += product.getPrice();
+        }
+        order.setAmount(amountTotal);
+        User user = repo.findByUsername(username);
+
+
         order.setUser(user);
         orderRepo.save(order);
         BuyResponse response = new BuyResponse();
+        response.setTotalAmount(order.getAmount());
+        response.setProducts(cart.get().getProducts());
         response.setMessage("Success");
         return response;
     }

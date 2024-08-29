@@ -5,5 +5,6 @@ import lombok.Data;
 @Data
 public class AddCartReq {
     private Integer productId;
+    private Integer cartId;
 
 }

@@ -1,5 +1,6 @@
 package com.abhinav.E_CommerceProject.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -12,7 +13,13 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @OneToMany
-    private List<Product> product;
+    private String name;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Product> products;
+
+//    @OneToMany
+//    private List<Product> product;
 
 }

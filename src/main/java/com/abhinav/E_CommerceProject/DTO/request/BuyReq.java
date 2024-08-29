@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class BuyReq {
-   private int Cartid;
+   private int cartId;
 }
